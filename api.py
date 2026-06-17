@@ -13,7 +13,12 @@ app = FastAPI(title="СанТехПро API")
 # Разрешаем запросы с вашего сайта
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://santehpro-vtst-vornezh.web.app",
+        "http://localhost:5173",
+        "http://localhost:8000",
+        "http://localhost:8080",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

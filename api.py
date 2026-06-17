@@ -27,6 +27,7 @@ DB_CONFIG = {
     "host": os.environ.get("DB_HOST", "dpg-d8pb7pkvikkc739emp00-a"),
     "port": os.environ.get("DB_PORT", 5432),
 }
+DATABASE_URL = "postgresql://santehpro_user:rx5jvjsOC8bPSB7lhOxr2SrV6M9LF06A@dpg-d8pb7pkvikkc739emp00-a.frankfurt-postgres.render.com/santehpro_db"
 
 
 # ============ PYDANTIC МОДЕЛИ ============
@@ -85,7 +86,8 @@ class UpdateProductRequest(BaseModel):
 async def get_db():
     """Получение соединения с БД"""
     try:
-        conn = await asyncpg.connect(**DB_CONFIG)
+        # conn = await asyncpg.connect(**DB_CONFIG)
+        conn = await asyncpg.connect(DATABASE_URL)
         return conn
     except Exception as e:
         print(f"❌ Ошибка подключения к БД: {e}")

@@ -388,12 +388,28 @@ def get_session_id(request: Request):
     return session_id
 
 
+def set_cart_cookie(response, session_id):
+    """Универсальная функция для установки куки"""
+    response.set_cookie(
+        key="cart_session",
+        value=session_id,
+        max_age=2592000,  # 30 дней
+        httponly=False,  # Чтобы JS мог читать куку
+        secure=True,  # Только по HTTPS
+        samesite="None",  # Разрешить кросс-доменные запросы
+    )
+    return response
+
+
 @app.get("/api/cart")
 async def get_cart(request: Request):
     """Получить корзину"""
     conn = None
     try:
-        session_id = get_session_id(request)
+        session_id = request.cookies.get("cart_session")
+        if not session_id:
+            session_id = str(uuid.uuid4())
+
         conn = await get_db()
 
         rows = await conn.fetch(
@@ -420,9 +436,7 @@ async def get_cart(request: Request):
             )
 
         response = JSONResponse(content=cart_items)
-        response.set_cookie(
-            key="cart_session", value=session_id, max_age=2592000, httponly=False
-        )
+        response = set_cart_cookie(response, session_id)  # Обновлённая кука
         return response
 
     except Exception as e:

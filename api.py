@@ -58,6 +58,30 @@ class CreateOrderRequest(BaseModel):
     discount: int = 0
 
 
+class CreateProductRequest(BaseModel):
+    """Модель для создания товара"""
+
+    name: str
+    category: str
+    price: float
+    img: Optional[str] = None
+    description: Optional[str] = None
+    stock: int = 10
+    popular: bool = False
+
+
+class UpdateProductRequest(BaseModel):
+    """Модель для обновления товара"""
+
+    name: Optional[str] = None
+    category: Optional[str] = None
+    price: Optional[float] = None
+    img: Optional[str] = None
+    description: Optional[str] = None
+    stock: Optional[int] = None
+    popular: Optional[bool] = None
+
+
 async def get_db():
     """Получение соединения с БД"""
     try:
@@ -68,7 +92,7 @@ async def get_db():
         raise
 
 
-# ============ ТОВАРЫ ============
+# ============ ТОВАРЫ (ПУБЛИЧНЫЕ) ============
 @app.get("/api/products")
 async def get_products(
     category: Optional[str] = None,
@@ -164,6 +188,185 @@ async def get_product(product_id: int):
     except Exception as e:
         print(f"❌ Ошибка: {e}")
         raise
+    finally:
+        if conn:
+            await conn.close()
+
+
+# ============ АДМИН: УПРАВЛЕНИЕ ТОВАРАМИ ============
+@app.post("/api/admin/products")
+async def create_product(product: CreateProductRequest):
+    """Создать новый товар (админ-панель)"""
+    conn = None
+    try:
+        conn = await get_db()
+
+        # Проверяем, существует ли товар с таким названием
+        existing = await conn.fetchrow(
+            "SELECT id FROM products WHERE name = $1", product.name
+        )
+        if existing:
+            raise HTTPException(
+                status_code=400, detail="Товар с таким названием уже существует"
+            )
+
+        # Добавляем товар
+        row = await conn.fetchrow(
+            """
+            INSERT INTO products (name, category, price, img, description, stock, popular)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            RETURNING id, name, category, price, img, description, stock, popular, created_at
+            """,
+            product.name,
+            product.category,
+            product.price,
+            product.img,
+            product.description,
+            product.stock,
+            product.popular,
+        )
+
+        return {
+            "success": True,
+            "message": "Товар успешно создан",
+            "product": {
+                "id": row["id"],
+                "name": row["name"],
+                "category": row["category"],
+                "price": float(row["price"]),
+                "img": row["img"],
+                "description": row["description"],
+                "stock": row["stock"],
+                "popular": row["popular"],
+                "created_at": str(row["created_at"]),
+            },
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Ошибка: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            await conn.close()
+
+
+@app.put("/api/admin/products/{product_id}")
+async def update_product(product_id: int, product: UpdateProductRequest):
+    """Обновить товар (админ-панель)"""
+    conn = None
+    try:
+        conn = await get_db()
+
+        # Проверяем, существует ли товар
+        existing = await conn.fetchrow(
+            "SELECT * FROM products WHERE id = $1", product_id
+        )
+        if not existing:
+            raise HTTPException(status_code=404, detail="Товар не найден")
+
+        # Собираем поля для обновления
+        updates = []
+        params = []
+        param_index = 1
+
+        if product.name is not None:
+            updates.append(f"name = ${param_index}")
+            params.append(product.name)
+            param_index += 1
+
+        if product.category is not None:
+            updates.append(f"category = ${param_index}")
+            params.append(product.category)
+            param_index += 1
+
+        if product.price is not None:
+            updates.append(f"price = ${param_index}")
+            params.append(product.price)
+            param_index += 1
+
+        if product.img is not None:
+            updates.append(f"img = ${param_index}")
+            params.append(product.img)
+            param_index += 1
+
+        if product.description is not None:
+            updates.append(f"description = ${param_index}")
+            params.append(product.description)
+            param_index += 1
+
+        if product.stock is not None:
+            updates.append(f"stock = ${param_index}")
+            params.append(product.stock)
+            param_index += 1
+
+        if product.popular is not None:
+            updates.append(f"popular = ${param_index}")
+            params.append(product.popular)
+            param_index += 1
+
+        if not updates:
+            raise HTTPException(status_code=400, detail="Нет полей для обновления")
+
+        # Добавляем product_id в конец параметров
+        params.append(product_id)
+        query = f"UPDATE products SET {', '.join(updates)} WHERE id = ${param_index} RETURNING *"
+
+        row = await conn.fetchrow(query, *params)
+
+        return {
+            "success": True,
+            "message": "Товар успешно обновлён",
+            "product": {
+                "id": row["id"],
+                "name": row["name"],
+                "category": row["category"],
+                "price": float(row["price"]),
+                "img": row["img"],
+                "description": row["description"],
+                "stock": row["stock"],
+                "popular": row["popular"],
+            },
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Ошибка: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            await conn.close()
+
+
+@app.delete("/api/admin/products/{product_id}")
+async def delete_product(product_id: int):
+    """Удалить товар (админ-панель)"""
+    conn = None
+    try:
+        conn = await get_db()
+
+        # Проверяем, существует ли товар
+        existing = await conn.fetchrow(
+            "SELECT id, name FROM products WHERE id = $1", product_id
+        )
+        if not existing:
+            raise HTTPException(status_code=404, detail="Товар не найден")
+
+        # Удаляем товар (каскадно удалит записи в корзине, если есть)
+        await conn.execute("DELETE FROM products WHERE id = $1", product_id)
+
+        return {
+            "success": True,
+            "message": f"Товар '{existing['name']}' (ID: {product_id}) успешно удалён",
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Ошибка: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         if conn:
             await conn.close()

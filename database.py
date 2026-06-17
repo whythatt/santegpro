@@ -4,10 +4,10 @@ import os
 
 # Данные для подключения - теперь из переменных окружения!
 DB_CONFIG = {
-    "user": os.environ.get("DB_USER", "santeh_user"),
-    "password": os.environ.get("DB_PASSWORD", "santeh123"),
+    "user": os.environ.get("DB_USER", "santehpro_user"),
+    "password": os.environ.get("DB_PASSWORD", "rx5jvjsOC8bPSB7lhOxr2SrV6M9LF06A"),
     "database": os.environ.get("DB_NAME", "santehpro_db"),
-    "host": os.environ.get("DB_HOST", "localhost"),
+    "host": os.environ.get("DB_HOST", "dpg-d8pb7pkvikkc739emp00-a"),
     "port": os.environ.get("DB_PORT", 5432),
 }
 

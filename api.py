@@ -29,16 +29,6 @@ DB_CONFIG = {
 }
 
 
-async def get_db():
-    """Получение соединения с БД"""
-    try:
-        conn = await asyncpg.connect(**DB_CONFIG)
-        return conn
-    except Exception as e:
-        print(f"❌ Ошибка подключения к БД: {e}")
-        raise
-
-
 # ============ PYDANTIC МОДЕЛИ ============
 class AddToCartRequest(BaseModel):
     """Модель для добавления товара в корзину"""

@@ -11,17 +11,22 @@ DB_CONFIG = {
     "port": os.environ.get("DB_PORT", 5432),
 }
 
+DATABASE_URL = "postgresql://santehpro_user:rx5jvjsOC8bPSB7lhOxr2SrV6M9LF06A@dpg-d8pb7pkvikkc739emp00-a.frankfurt-postgres.render.com/santehpro_db"
+
+
 async def create_database():
     """Создание базы данных если не существует"""
     try:
         # Подключаемся к postgres для создания БД
-        conn = await asyncpg.connect(
-            user=DB_CONFIG["user"],
-            password=DB_CONFIG["password"],
-            host=DB_CONFIG["host"],
-            port=DB_CONFIG["port"],
-            database="postgres",
-        )
+        # conn = await asyncpg.connect(
+        #     user=DB_CONFIG["user"],
+        #     password=DB_CONFIG["password"],
+        #     host=DB_CONFIG["host"],
+        #     port=DB_CONFIG["port"],
+        #     database="postgres",
+        # )
+
+        conn = await asyncpg.connect(DATABASE_URL)
 
         # Проверяем существует ли БД
         exists = await conn.fetchval(
@@ -49,7 +54,8 @@ async def create_tables():
         await create_database()
 
         # Подключаемся к нашей БД
-        conn = await asyncpg.connect(**DB_CONFIG)
+        # conn = await asyncpg.connect(**DB_CONFIG)
+        conn = await asyncpg.connect(DATABASE_URL)
         print("✅ Подключено к базе данных")
 
         # Удаляем старые таблицы (для пересоздания)
@@ -190,7 +196,8 @@ async def create_tables():
 async def test_connection():
     """Тест подключения"""
     try:
-        conn = await asyncpg.connect(**DB_CONFIG)
+        # conn = await asyncpg.connect(**DB_CONFIG)
+        conn = await asyncpg.connect(DATABASE_URL)
         version = await conn.fetchval("SELECT version()")
         print(f"✅ Подключено к PostgreSQL: {version[:50]}...")
         await conn.close()

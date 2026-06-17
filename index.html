@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=yes"
+    />
+    <title>СанТехПро - Современная сантехника для вашего дома</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="container">
+        <div class="header-flex">
+          <div class="logo">СанТех<span>Про</span></div>
+          <div class="search-wrapper">
+            <input
+              type="text"
+              id="searchInputGlobal"
+              placeholder="Поиск товаров..."
+            />
+            <i class="fas fa-search"></i>
+          </div>
+          <button class="vision-btn" id="visionToggle">
+            <i class="fas fa-eye"></i> Версия для слабовидящих
+          </button>
+          <div class="cart-icon" id="cartIcon">
+            <i class="fas fa-shopping-cart"></i>
+            <span id="cartCount">0</span>
+          </div>
+        </div>
+        <div class="nav-links">
+          <a href="index.html">Главная</a>
+          <a href="about.html">О нас</a>
+          <a href="catalog.html">Товары</a>
+          <a href="cart.html">Корзина</a>
+          <a href="contacts.html">Контакты</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <!-- Hero слайдер -->
+        <div class="hero-slider swiper heroSwiper">
+          <div class="swiper-wrapper">
+            <div class="swiper-slide">
+              <img
+                src="https://i.pinimg.com/1200x/f8/27/31/f82731fe9706c311adafcacc66fdcd04.jpg"
+                alt="Сантехника премиум"
+              />
+            </div>
+            <div class="swiper-slide">
+              <img
+                src="https://i.pinimg.com/1200x/47/f8/31/47f831dd1a23c5b988a2de9c0f04c8af.jpg"
+                alt="Ванные комнаты"
+              />
+            </div>
+            <div class="swiper-slide">
+              <img
+                src="https://i.pinimg.com/736x/b6/59/3a/b6593a9c9349eeb4dd8256e6766f17c0.jpg"
+                alt="Керамика и душевые"
+              />
+            </div>
+          </div>
+          <div class="swiper-pagination"></div>
+          <div class="swiper-button-next"></div>
+          <div class="swiper-button-prev"></div>
+        </div>
+
+        <!-- Баннер -->
+        <div class="info-banner">
+          <h3>⚡ СанТехПро — №1 в системах водоснабжения</h3>
+          <p>
+            Более 10 лет лидерства на рынке сантехники. Огромный выбор
+            смесителей, душевых систем, радиаторов и инсталляций. Только
+            оригинальная продукция от ведущих брендов.
+          </p>
+        </div>
+
+        <!-- Акции -->
+        <div class="section-title">🔥 Акции и спецпредложения</div>
+        <div class="swiper actionsSlider">
+          <div class="swiper-wrapper">
+            <div class="swiper-slide">
+              <div class="action-card">
+                <div class="action-badge">-20%</div>
+                <div class="action-content">
+                  <h3>Скидка на душевые системы</h3>
+                  <p>GROHE, HANSGROHE, LEMARK</p>
+                  <div class="action-old-price">от 12 990 ₽</div>
+                  <div class="action-new-price">от 9 990 ₽</div>
+                  <button
+                    class="action-btn"
+                    onclick="location.href = 'catalog.html'"
+                  >
+                    Подробнее
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="swiper-slide">
+              <div class="action-card">
+                <div class="action-badge">Подарок</div>
+                <div class="action-content">
+                  <h3>Керамика + инсталляция</h3>
+                  <p>При покупке комплекта — доставка бесплатно</p>
+                  <div class="action-old-price">24 990 ₽</div>
+                  <div class="action-new-price">19 990 ₽</div>
+                  <button
+                    class="action-btn"
+                    onclick="location.href = 'catalog.html'"
+                  >
+                    Подробнее
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="swiper-slide">
+              <div class="action-card">
+                <div class="action-badge">0%</div>
+                <div class="action-content">
+                  <h3>Рассрочка 0%</h3>
+                  <p>На все товары от 10 000 ₽ до 6 месяцев</p>
+                  <div class="action-old-price">Без переплат</div>
+                  <div class="action-new-price">0% первый взнос</div>
+                  <button
+                    class="action-btn"
+                    onclick="location.href = 'catalog.html'"
+                  >
+                    Подробнее
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="swiper-pagination"></div>
+        </div>
+
+        <!-- Преимущества -->
+        <div class="section-title">Почему выбирают нас</div>
+        <div class="advantages">
+          <div class="advantage-card">
+            <i class="fas fa-truck" style="font-size: 2rem"></i>
+            <h3>Быстрая доставка</h3>
+            <p>1-2 дня по городу</p>
+          </div>
+          <div class="advantage-card">
+            <i class="fas fa-wrench"></i>
+            <h3>Гарантия 5 лет</h3>
+            <p>Сервисное обслуживание</p>
+          </div>
+          <div class="advantage-card">
+            <i class="fas fa-tag"></i>
+            <h3>Цены ниже рынка</h3>
+            <p>Работаем напрямую</p>
+          </div>
+          <div class="advantage-card">
+            <i class="fas fa-headset"></i>
+            <h3>Консультация 24/7</h3>
+            <p>Профессионалы</p>
+          </div>
+        </div>
+
+        <!-- Партнеры -->
+        <div class="section-title">Наши партнёры</div>
+        <div class="swiper partnersSlider">
+          <div class="swiper-wrapper">
+            <div class="swiper-slide partner-item">GROHE</div>
+            <div class="swiper-slide partner-item">VIEGA</div>
+            <div class="swiper-slide partner-item">TECE</div>
+            <div class="swiper-slide partner-item">JACOB DELAFON</div>
+            <div class="swiper-slide partner-item">Roca</div>
+          </div>
+        </div>
+
+        <!-- Популярные товары -->
+        <div class="section-title">⭐ Популярные товары</div>
+        <div class="products-grid" id="popularProducts"></div>
+        <div style="text-align: center; margin-bottom: 40px">
+          <button class="btn-submit" onclick="location.href = 'catalog.html'">
+            Смотреть весь каталог
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div>
+            <h3>СанТехПро</h3>
+            <p>Сантехника для дома и бизнеса</p>
+          </div>
+          <div>
+            <h4>Контакты</h4>
+            <p>+7 (495) 123-45-67<br />info@santehpro.ru</p>
+          </div>
+          <div class="social">
+            <h4>Соцсети</h4>
+            <i class="fab fa-vk"></i>
+            <i class="fab fa-telegram"></i>
+            <i class="fab fa-whatsapp"></i>
+          </div>
+        </div>
+        <hr />
+        <p style="text-align: center">© СанТехПро 2025 — Все права защищены</p>
+      </div>
+    </footer>
+
+    <div id="productModal" class="modal">
+      <div class="modal-content">
+        <h3 id="modalTitle"></h3>
+        <p id="modalDesc"></p>
+        <p id="modalPrice"></p>
+        <button onclick="closeModal()">Закрыть</button>
+        <button id="modalAddCart">В корзину</button>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/products.js"></script>
+    <script>
+      // Инициализация слайдеров
+      document.addEventListener("DOMContentLoaded", function () {
+        new Swiper(".heroSwiper", {
+          loop: true,
+          autoplay: { delay: 4000 },
+          pagination: { el: ".swiper-pagination" },
+          navigation: {
+            nextEl: ".swiper-button-next",
+            prevEl: ".swiper-button-prev",
+          },
+        });
+        new Swiper(".actionsSlider", {
+          slidesPerView: 1,
+          autoplay: { delay: 3000 },
+          pagination: { el: ".swiper-pagination" },
+          breakpoints: { 768: { slidesPerView: 2, spaceBetween: 20 } },
+        });
+        new Swiper(".partnersSlider", {
+          slidesPerView: 2,
+          autoplay: true,
+          breakpoints: {
+            640: { slidesPerView: 3 },
+            1024: { slidesPerView: 5 },
+          },
+        });
+      });
+    </script>
+  </body>
+</html>

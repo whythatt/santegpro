@@ -1,13 +1,14 @@
 import asyncpg
 import asyncio
+import os
 
-# Данные для подключения
+# Данные для подключения - теперь из переменных окружения!
 DB_CONFIG = {
-    "user": "santeh_user",
-    "password": "santeh123",
-    "database": "santehpro_db",
-    "host": "localhost",
-    "port": 5432,
+    "user": os.environ.get("DB_USER", "santeh_user"),
+    "password": os.environ.get("DB_PASSWORD", "santeh123"),
+    "database": os.environ.get("DB_NAME", "santehpro_db"),
+    "host": os.environ.get("DB_HOST", "localhost"),
+    "port": os.environ.get("DB_PORT", 5432),
 }
 
 
@@ -45,26 +46,13 @@ async def create_database():
 async def create_tables():
     """Создание всех таблиц"""
     try:
-        # Сначала создаем БД
-        await create_database()
-
         # Подключаемся к нашей БД
         conn = await asyncpg.connect(**DB_CONFIG)
         print("✅ Подключено к базе данных")
 
-        # Удаляем старые таблицы (для пересоздания)
-        await conn.execute("""
-            DROP TABLE IF EXISTS order_items CASCADE;
-            DROP TABLE IF EXISTS orders CASCADE;
-            DROP TABLE IF EXISTS carts CASCADE;
-            DROP TABLE IF EXISTS products CASCADE;
-            DROP TABLE IF EXISTS promocodes CASCADE;
-        """)
-        print("✅ Старые таблицы удалены")
-
         # Создание таблицы товаров
         await conn.execute("""
-            CREATE TABLE products (
+            CREATE TABLE IF NOT EXISTS products (
                 id SERIAL PRIMARY KEY,
                 name VARCHAR(255) NOT NULL,
                 category VARCHAR(100) NOT NULL,
@@ -80,7 +68,7 @@ async def create_tables():
 
         # Создание таблицы корзины
         await conn.execute("""
-            CREATE TABLE carts (
+            CREATE TABLE IF NOT EXISTS carts (
                 id SERIAL PRIMARY KEY,
                 session_id VARCHAR(100) NOT NULL,
                 product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
@@ -93,7 +81,7 @@ async def create_tables():
 
         # Создание таблицы заказов
         await conn.execute("""
-            CREATE TABLE orders (
+            CREATE TABLE IF NOT EXISTS orders (
                 id SERIAL PRIMARY KEY,
                 order_number VARCHAR(50) UNIQUE NOT NULL,
                 customer_name VARCHAR(100) NOT NULL,
@@ -116,7 +104,7 @@ async def create_tables():
 
         # Создание таблицы товаров в заказе
         await conn.execute("""
-            CREATE TABLE order_items (
+            CREATE TABLE IF NOT EXISTS order_items (
                 id SERIAL PRIMARY KEY,
                 order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
                 product_id INTEGER REFERENCES products(id),
@@ -129,7 +117,7 @@ async def create_tables():
 
         # Создание таблицы промокодов
         await conn.execute("""
-            CREATE TABLE promocodes (
+            CREATE TABLE IF NOT EXISTS promocodes (
                 id SERIAL PRIMARY KEY,
                 code VARCHAR(50) UNIQUE NOT NULL,
                 discount_type VARCHAR(20) DEFAULT 'percent',
@@ -141,42 +129,43 @@ async def create_tables():
         """)
         print("✅ Таблица promocodes создана")
 
-        # Добавляем тестовые товары
-        await conn.execute("""
-            INSERT INTO products (name, category, price, img, description, popular, stock)
-            VALUES 
-                ('Смеситель Grohe Eurosmart', 'Смеситель', 5890, '🚰', 'Хромированный, поворотный излив, керамический картридж', true, 15),
-                ('Душевая система Hansgrohe', 'Душевая', 12490, '🚿', 'Тропический дождь, термостат, 3 режима', true, 8),
-                ('Унитаз подвесной Roca', 'Унитаз', 15990, '🚽', 'Компакт, сиденье микро-лифт', true, 5),
-                ('Смеситель для раковины Lemark', 'Смеситель', 3450, '🚰', 'Однорычажный, керамический картридж', false, 20),
-                ('Душевая стойка Lemax', 'Душевая', 7890, '🚿', 'С лейкой и верхним душем', false, 12),
-                ('Раковина Blanco', 'Раковина', 8900, '💧', 'Керамическая, 60 см, с переливом', false, 7),
-                ('Ванна акриловая Ravak', 'Ванна', 24990, '🛁', '170 см, с гидромассажем', false, 3),
-                ('Смеситель с душем Kaiser', 'Смеситель', 4290, '🚰', 'Для ванны, с душевым шлангом', false, 10)
-        """)
-        print("✅ Тестовые товары добавлены")
+        # Проверяем, есть ли уже товары
+        count = await conn.fetchval("SELECT COUNT(*) FROM products")
 
-        # Добавляем промокоды
-        await conn.execute("""
-            INSERT INTO promocodes (code, discount_type, discount_value, min_order_amount, is_active)
-            VALUES 
-                ('SANTEH20', 'percent', 20, 0, true),
-                ('SANTEH500', 'fixed', 500, 3000, true),
-                ('WELCOME10', 'percent', 10, 0, true)
-        """)
-        print("✅ Промокоды добавлены")
+        if count == 0:
+            # Добавляем тестовые товары только если их нет
+            await conn.execute("""
+                INSERT INTO products (name, category, price, img, description, popular, stock)
+                VALUES 
+                    ('Смеситель Grohe Eurosmart', 'Смеситель', 5890, '🚰', 'Хромированный, поворотный излив, керамический картридж', true, 15),
+                    ('Душевая система Hansgrohe', 'Душевая', 12490, '🚿', 'Тропический дождь, термостат, 3 режима', true, 8),
+                    ('Унитаз подвесной Roca', 'Унитаз', 15990, '🚽', 'Компакт, сиденье микро-лифт', true, 5),
+                    ('Смеситель для раковины Lemark', 'Смеситель', 3450, '🚰', 'Однорычажный, керамический картридж', false, 20),
+                    ('Душевая стойка Lemax', 'Душевая', 7890, '🚿', 'С лейкой и верхним душем', false, 12),
+                    ('Раковина Blanco', 'Раковина', 8900, '💧', 'Керамическая, 60 см, с переливом', false, 7),
+                    ('Ванна акриловая Ravak', 'Ванна', 24990, '🛁', '170 см, с гидромассажем', false, 3),
+                    ('Смеситель с душем Kaiser', 'Смеситель', 4290, '🚰', 'Для ванны, с душевым шлангом', false, 10)
+            """)
+            print("✅ Тестовые товары добавлены")
 
-        # Проверяем результат
+        # Проверяем промокоды
+        promo_count = await conn.fetchval("SELECT COUNT(*) FROM promocodes")
+
+        if promo_count == 0:
+            await conn.execute("""
+                INSERT INTO promocodes (code, discount_type, discount_value, min_order_amount, is_active)
+                VALUES 
+                    ('SANTEH20', 'percent', 20, 0, true),
+                    ('SANTEH500', 'fixed', 500, 3000, true),
+                    ('WELCOME10', 'percent', 10, 0, true)
+            """)
+            print("✅ Промокоды добавлены")
+
         product_count = await conn.fetchval("SELECT COUNT(*) FROM products")
-        cart_count = await conn.fetchval("SELECT COUNT(*) FROM carts")
-
-        print(f"\n📊 ИТОГО:")
-        print(f"   - Товаров: {product_count}")
-        print(f"   - Корзина: {cart_count} записей")
-        print(f"   - Промокодов: 3")
+        print(f"\n📊 ИТОГО товаров: {product_count}")
 
         await conn.close()
-        print("\n✅ База данных успешно создана и заполнена!")
+        print("\n✅ База данных успешно настроена!")
         return True
 
     except Exception as e:
@@ -187,43 +176,15 @@ async def create_tables():
         return False
 
 
-async def test_connection():
-    """Тест подключения"""
-    try:
-        conn = await asyncpg.connect(**DB_CONFIG)
-        version = await conn.fetchval("SELECT version()")
-        print(f"✅ Подключено к PostgreSQL: {version[:50]}...")
-        await conn.close()
-        return True
-    except Exception as e:
-        print(f"❌ Не удалось подключиться: {e}")
-        return False
-
-
 async def main():
     print("=" * 50)
     print("🔄 НАСТРОЙКА БАЗЫ ДАННЫХ")
     print("=" * 50)
 
-    # Тест подключения
-    print("\n1. Проверка подключения...")
-    if not await test_connection():
-        print("\n⚠️ Убедитесь что PostgreSQL запущен:")
-        print("   - Windows: net start postgresql")
-        print("   - MacOS: brew services start postgresql")
-        print("   - Linux: sudo service postgresql start")
-        return
-
-    # Создание таблиц
-    print("\n2. Создание таблиц...")
     if await create_tables():
         print("\n" + "=" * 50)
         print("✅ ГОТОВО! База данных настроена.")
         print("=" * 50)
-        print("\nТеперь запустите сервер:")
-        print("   python api.py")
-    else:
-        print("\n❌ Ошибка при создании базы данных")
 
 
 if __name__ == "__main__":

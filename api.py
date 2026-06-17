@@ -6,6 +6,7 @@ import asyncpg
 from typing import Optional
 import uuid
 from datetime import datetime
+import os
 
 app = FastAPI(title="СанТехПро API")
 
@@ -18,14 +19,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Подключение к БД
+# Подключение к БД - ИЗ ПЕРЕМЕННЫХ ОКРУЖЕНИЯ!
 DB_CONFIG = {
-    "user": "santeh_user",
-    "password": "santeh123",
-    "database": "santehpro_db",
-    "host": "localhost",
-    "port": 5432,
+    "user": os.environ.get("DB_USER", "santeh_user"),
+    "password": os.environ.get("DB_PASSWORD", "santeh123"),
+    "database": os.environ.get("DB_NAME", "santehpro_db"),
+    "host": os.environ.get("DB_HOST", "localhost"),
+    "port": os.environ.get("DB_PORT", 5432),
 }
+
+
+async def get_db():
+    """Получение соединения с БД"""
+    try:
+        conn = await asyncpg.connect(**DB_CONFIG)
+        return conn
+    except Exception as e:
+        print(f"❌ Ошибка подключения к БД: {e}")
+        raise
 
 
 # ============ PYDANTIC МОДЕЛИ ============
